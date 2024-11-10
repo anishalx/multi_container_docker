@@ -9,14 +9,14 @@ script:
   - docker run -e CI=true spine/react-test npm test -- --coverage
 
 after_success:
-  - docker build -t spine/multi-client ./client
-  - docker build -t spine/multi-nginx ./nginx
-  - docker build -t spine/multi-server ./server
-  - docker build -t spine/multi-worker ./worker
+  - docker build -t spine/multi-client:latest ./client
+  - docker build -t spine/multi-nginx:latest ./nginx
+  - docker build -t spine/multi-server:latest ./server
+  - docker build -t spine/multi-worker:latest ./worker
   # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   # Take those images and push them to docker hub
-  - docker push spine/multi-client
-  - docker push spine/multi-nginx
-  - docker push spine/multi-server
-  - docker push spine/multi-worker
+  - docker push spine/multi-client:latest
+  - docker push spine/multi-nginx:latest
+  - docker push spine/multi-server:latest
+  - docker push spine/multi-worker:latest
