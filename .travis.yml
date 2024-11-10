@@ -3,20 +3,20 @@ services:
   - docker
 
 before_install:
-  - docker build -t spine/react-test -f ./client/Dockerfile.dev ./client
+  - docker build -t anishalx/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run -e CI=true spine/react-test npm test -- --coverage
+  - docker run -e CI=true anishalx/react-test npm test -- --coverage
 
 after_success:
-  - docker build -t spine/multi-client:latest ./client
-  - docker build -t spine/multi-nginx:latest ./nginx
-  - docker build -t spine/multi-server:latest ./server
-  - docker build -t spine/multi-worker:latest ./worker
+  - docker build -t anishalx/multi-client:latest ./client
+  - docker build -t anishalx/multi-nginx:latest ./nginx
+  - docker build -t anishalx/multi-server:latest ./server
+  - docker build -t anishalx/multi-worker:latest ./worker
   # Log in to the docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
   # Take those images and push them to docker hub
-  - docker push spine/multi-client:latest || exit 1
-  - docker push spine/multi-nginx:latest || exit 1
-  - docker push spine/multi-server:latest || exit 1
-  - docker push spine/multi-worker:latest || exit 1
+  - docker push anishalx/multi-client:latest || exit 1
+  - docker push anishalx/multi-nginx:latest || exit 1
+  - docker push anishalx/multi-server:latest || exit 1
+  - docker push anishalx/multi-worker:latest || exit 1
