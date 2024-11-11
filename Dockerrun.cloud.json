@@ -1,0 +1,38 @@
+{
+    "CLOUDDockerrunVersion": 2,
+    "containerDefinitions": [
+        {
+            "name": "client",
+            "image": "anishalx/multi-client",
+            "hostname": "client",
+            "essential": false
+        },
+        {
+            "name": "server",
+            "image":"anishalx/multi-server",
+            "hostname":"api",
+            "essential": false
+        },
+        {
+            "name": "worker",
+            "image":"anishalx/multi-worker",
+            "hostname":"worker",
+            "essential": false
+            
+        },
+        {
+            "name": "nginx",
+            "image":"anishalx/multi-nginx",
+            "hostname":"nginx",
+            "essential": true,
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "containerPort": 80
+                }
+            ],
+            "links": ["client", "server"]
+            
+        }
+    ]
+}
