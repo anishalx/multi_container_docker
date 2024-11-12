@@ -22,7 +22,7 @@ services:
         value: redis://redis:6379
 
   - name: worker
-    type: background
+    type: worker
     env: docker
     plan: free
     image: anishalx/multi-worker:latest
@@ -54,6 +54,7 @@ services:
 
   - name: redis
     type: web
+    env: docker
     plan: free
     image: redis:alpine
     startCommand: docker run redis
