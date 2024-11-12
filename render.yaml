@@ -1,45 +1,62 @@
-version: '3'
 services:
-  postgres:
-     image: 'postgres:latest'
-  redis:
-     image: 'redis:latest'
-  nginx:
-    restart: always
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./nginx
+  - name: client
+    type: web
+    env: docker
+    plan: free
+    image: anishalx/multi-client:latest
+    startCommand: docker run -p 3000:3000 anishalx/multi-client
+    envVars:
+      - key: REACT_APP_API_URL
+        value: http://api:5000
+
+  - name: server
+    type: web
+    env: docker
+    plan: free
+    image: anishalx/multi-server:latest
+    startCommand: docker run -p 5000:5000 anishalx/multi-server
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres:[PASSWORD]@postgres:5432/mydb
+      - key: REDIS_URL
+        value: redis://redis:6379
+
+  - name: worker
+    type: worker
+    env: docker
+    plan: free
+    image: anishalx/multi-worker:latest
+    startCommand: docker run anishalx/multi-worker
+    envVars:
+      - key: REDIS_URL
+        value: redis://redis:6379
+
+  - name: nginx
+    type: web
+    env: docker
+    plan: free
+    image: anishalx/multi-nginx:latest
+    startCommand: docker run -p 80:80 anishalx/multi-nginx
     ports:
-      - '3050:80'
-  api:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
-    volumes:
-      - /app/node_modules
-      - ./server:/app
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGDATABASE=postgres
-      - PGPASSWORD=postgres_password
-      - PGPORT=5432
-  client:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./client
-    volumes:
-      - /app/node_modules
-      - ./client:/app
-  worker:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./worker
-    volumes:
-      - /app/node_modules
-      - ./worker:/app
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - 80
+
+  - name: postgres
+    type: database
+    plan: free
+    image: postgres:latest
+    envVars:
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: [PASSWORD]
+      - key: POSTGRES_DB
+        value: mydb
+
+  - name: redis
+    type: web
+    env: docker
+    plan: free
+    image: redis:alpine
+    startCommand: docker run redis
+    ports:
+      - 6379
