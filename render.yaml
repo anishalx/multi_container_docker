@@ -33,7 +33,7 @@ services:
     port: 5000
 
   - name: worker
-    type: background
+    type: web
     env: docker
     plan: free
     image: anishalx/multi-worker:latest
