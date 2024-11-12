@@ -1,45 +1,28 @@
 services:
   - name: postgres
-    type: web
-    env: docker
+    type: database
     plan: free
     image: postgres:latest
-    startCommand: docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres_password -e POSTGRES_DB=postgres postgres:latest
     envVars:
-      - key: PGUSER
+      - key: POSTGRES_USER
         value: postgres
-      - key: PGPASSWORD
+      - key: POSTGRES_PASSWORD
         value: postgres_password
-      - key: PGDATABASE
+      - key: POSTGRES_DB
         value: postgres
-      - key: PGPORT
-        value: 5432
 
   - name: redis
     type: web
     env: docker
     plan: free
     image: redis:latest
-    startCommand: docker run redis:latest
-    ports:
-      - 6379
 
-  - name: client
+  - name: my-app
     type: web
     env: docker
     plan: free
-    image: anishalx/multi-client:latest
-    startCommand: docker run -p 3000:3000 anishalx/multi-client
-    envVars:
-      - key: REACT_APP_API_URL
-        value: http://api:5000
-
-  - name: server
-    type: web
-    env: docker
-    plan: free
-    image: anishalx/multi-server:latest
-    startCommand: docker run -p 5000:5000 anishalx/multi-server
+    buildCommand: docker build -t my-app:latest .
+    startCommand: docker run -p 80:80 my-app:latest
     envVars:
       - key: REDIS_HOST
         value: redis
@@ -49,35 +32,9 @@ services:
         value: postgres
       - key: PGPASSWORD
         value: postgres_password
-      - key: PGHOST
-        value: postgres
       - key: PGDATABASE
+        value: postgres
+      - key: PGHOST
         value: postgres
       - key: PGPORT
         value: 5432
-
-  - name: worker
-    type: worker
-    env: docker
-    plan: free
-    image: anishalx/multi-worker:latest
-    startCommand: docker run anishalx/multi-worker
-    envVars:
-      - key: REDIS_HOST
-        value: redis
-      - key: REDIS_PORT
-        value: 6379
-
-  - name: nginx
-    type: web
-    env: docker
-    plan: free
-    image: anishalx/multi-nginx:latest
-    startCommand: docker run -p 80:80 anishalx/multi-nginx
-    ports:
-      - 80
-    envVars:
-      - key: CLIENT_URL
-        value: http://client:3000
-      - key: SERVER_URL
-        value: http://api:5000
