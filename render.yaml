@@ -1,4 +1,29 @@
 services:
+  - name: postgres
+    type: web
+    env: docker
+    plan: free
+    image: postgres:latest
+    startCommand: docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres_password -e POSTGRES_DB=postgres postgres:latest
+    envVars:
+      - key: PGUSER
+        value: postgres
+      - key: PGPASSWORD
+        value: postgres_password
+      - key: PGDATABASE
+        value: postgres
+      - key: PGPORT
+        value: 5432
+
+  - name: redis
+    type: web
+    env: docker
+    plan: free
+    image: redis:latest
+    startCommand: docker run redis:latest
+    ports:
+      - 6379
+
   - name: client
     type: web
     env: docker
@@ -16,10 +41,20 @@ services:
     image: anishalx/multi-server:latest
     startCommand: docker run -p 5000:5000 anishalx/multi-server
     envVars:
-      - key: DATABASE_URL
-        value: postgresql://postgres:[PASSWORD]@postgres:5432/mydb
-      - key: REDIS_URL
-        value: redis://redis:6379
+      - key: REDIS_HOST
+        value: redis
+      - key: REDIS_PORT
+        value: 6379
+      - key: PGUSER
+        value: postgres
+      - key: PGPASSWORD
+        value: postgres_password
+      - key: PGHOST
+        value: postgres
+      - key: PGDATABASE
+        value: postgres
+      - key: PGPORT
+        value: 5432
 
   - name: worker
     type: worker
@@ -28,8 +63,10 @@ services:
     image: anishalx/multi-worker:latest
     startCommand: docker run anishalx/multi-worker
     envVars:
-      - key: REDIS_URL
-        value: redis://redis:6379
+      - key: REDIS_HOST
+        value: redis
+      - key: REDIS_PORT
+        value: 6379
 
   - name: nginx
     type: web
@@ -39,24 +76,8 @@ services:
     startCommand: docker run -p 80:80 anishalx/multi-nginx
     ports:
       - 80
-
-  - name: postgres
-    type: database
-    plan: free
-    image: postgres:latest
     envVars:
-      - key: POSTGRES_USER
-        value: postgres
-      - key: POSTGRES_PASSWORD
-        value: [PASSWORD]
-      - key: POSTGRES_DB
-        value: mydb
-
-  - name: redis
-    type: web
-    env: docker
-    plan: free
-    image: redis:alpine
-    startCommand: docker run redis
-    ports:
-      - 6379
+      - key: CLIENT_URL
+        value: http://client:3000
+      - key: SERVER_URL
+        value: http://api:5000
