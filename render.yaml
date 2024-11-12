@@ -1,43 +1,68 @@
 services:
-  - name: postgres
+  - name: client
     type: web
     env: docker
     plan: free
-    docker:
-      image: postgres:latest
+    image: anishalx/multi-client:latest
+    healthCheckPath: /
     envVars:
-      - key: POSTGRES_USER
-        value: postgres
-      - key: POSTGRES_PASSWORD
-        value: postgres_password
-      - key: POSTGRES_DB
-        value: postgres
+      - key: REACT_APP_API_URL
+        value: http://server:5000
+    port: 3000
 
-  - name: redis
+  - name: server
     type: web
     env: docker
     plan: free
-    docker:
-      image: redis:latest
-
-  - name: my-app
-    type: web
-    env: docker
-    plan: free
-    buildCommand: docker build -t my-app:latest .
-    startCommand: docker run -p 80:80 my-app:latest
+    image: anishalx/multi-server:latest
     envVars:
-      - key: REDIS_HOST
-        value: redis
-      - key: REDIS_PORT
-        value: 6379
+      - key: DATABASE_URL
+        value: postgresql://postgres:[YOUR_PASSWORD]@postgres:5432/mydb
+      - key: REDIS_URL
+        value: redis://redis:6379
       - key: PGUSER
         value: postgres
       - key: PGPASSWORD
-        value: postgres_password
+        value: [YOUR_PASSWORD]
       - key: PGDATABASE
-        value: postgres
+        value: mydb
       - key: PGHOST
         value: postgres
       - key: PGPORT
         value: 5432
+    port: 5000
+
+  - name: worker
+    type: background
+    env: docker
+    plan: free
+    image: anishalx/multi-worker:latest
+    envVars:
+      - key: REDIS_URL
+        value: redis://redis:6379
+
+  - name: nginx
+    type: web
+    env: docker
+    plan: free
+    image: anishalx/multi-nginx:latest
+    startCommand: docker run -p 80:80 anishalx/multi-nginx
+    ports:
+      - 80
+
+  - name: postgres
+    type: postgres
+    plan: free
+    envVars:
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: [YOUR_PASSWORD]
+      - key: POSTGRES_DB
+        value: mydb
+
+  - name: redis
+    type: redis
+    plan: free
+    ports:
+      - 6379
