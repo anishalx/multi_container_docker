@@ -1,6 +1,7 @@
 services:
   - name: postgres
-    type: database
+    type: web
+    env: docker
     plan: free
     image: postgres:latest
     envVars:
